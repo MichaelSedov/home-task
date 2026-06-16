@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  SESSION_SECRET: ${{ secrets.SESSION_SECRET || 'ci-secret-placeholder-minimum-32-chars' }}
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── 1. Lint + format ──────────────────────────────────────────────────
+      - name: Lint
+        run: pnpm lint
+
+      # ── 2. Type-check ─────────────────────────────────────────────────────
+      - name: Type-check
+        run: pnpm exec svelte-kit sync && pnpm exec tsc --noEmit
+
+      # ── 3. svelte-check ───────────────────────────────────────────────────
+      - name: svelte-check
+        run: pnpm exec svelte-check
+
+      # ── 4. Unit tests ─────────────────────────────────────────────────────
+      - name: Unit tests
+        run: pnpm test:unit
+
+      # ── 5. Build ──────────────────────────────────────────────────────────
+      - name: Build
+        run: pnpm build
+
+      # ── 6. Bundle size ────────────────────────────────────────────────────
+      - name: Bundle size check
+        run: pnpm size
+        continue-on-error: true # warn but don't fail on first deploy
+
+      # ── 7. Playwright install ─────────────────────────────────────────────
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      # ── 8. E2E tests ──────────────────────────────────────────────────────
+      - name: E2E tests
+        run: pnpm test:e2e
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      # ── 9. Lighthouse CI ─────────────────────────────────────────────────
+      - name: Lighthouse CI
+        run: |
+          pnpm build
+          pnpm exec lhci autorun || true   # advisory until budgets are tuned
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

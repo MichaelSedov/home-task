@@ -3,9 +3,9 @@ import { readSession } from '$lib/server/auth/session.js';
 import { isLocale } from '$lib/i18n/dict.js';
 import type { Locale } from '$lib/i18n/dict.js';
 
-function detectLang(request: Request, cookies: string | null): Locale {
-	// 1. cookie
-	const cookieLang = cookies?.match(/lang=([^;]+)/)?.[1];
+function detectLang(request: Request, cookieHeader: string | null): Locale {
+	// 1. lang cookie
+	const cookieLang = cookieHeader?.match(/(?:^|;\s*)lang=([^;]+)/)?.[1];
 	if (isLocale(cookieLang)) return cookieLang;
 
 	// 2. Accept-Language header
@@ -21,20 +21,21 @@ function detectLang(request: Request, cookies: string | null): Locale {
 export const handle: Handle = async ({ event, resolve }) => {
 	const cookieHeader = event.request.headers.get('cookie');
 
-	// session
-	event.locals.user = await readSession(cookieHeader);
+	// session — use event.cookies.get so SvelteKit handles URL-decoding
+	event.locals.user = await readSession(event.cookies);
 
 	// theme
-	const themeCookie = cookieHeader?.match(/theme=([^;]+)/)?.[1];
+	const themeCookie = event.cookies.get('theme');
 	event.locals.theme = themeCookie === 'dark' ? 'dark' : 'light';
 
-	// lang — will be overridden by route segment if present
+	// lang — overridden by URL segment in route layouts
 	event.locals.lang = detectLang(event.request, cookieHeader);
 
-	// security headers
 	const response = await resolve(event, {
 		transformPageChunk({ html }) {
-			return html.replace('data-theme="light"', `data-theme="${event.locals.theme}"`);
+			return html
+				.replace('data-theme="light"', `data-theme="${event.locals.theme}"`)
+				.replace('lang="en"', `lang="${event.locals.lang}"`);
 		}
 	});
 

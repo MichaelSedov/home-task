@@ -4,6 +4,8 @@ import { parseSearchQuery } from '$lib/schemas/query.js';
 
 // Edge runtime: low latency global search over 20 in-memory posts
 export const config = { runtime: 'edge' };
+// Must not prerender — page reads url.searchParams at request time
+export const prerender = false;
 
 export const load: PageServerLoad = ({ url, params }) => {
 	const query = parseSearchQuery(url.searchParams);

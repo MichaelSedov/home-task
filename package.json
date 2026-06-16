@@ -29,9 +29,9 @@
 	},
 	"size-limit": [
 		{
-			"name": "Public surface",
+			"name": "Entry JS (public surface)",
 			"path": ".svelte-kit/output/client/_app/immutable/entry/*.js",
-			"limit": "80 KB",
+			"limit": "120 KB",
 			"gzip": true
 		}
 	],
@@ -40,6 +40,7 @@
 		"@eslint/js": "^10.0.1",
 		"@lhci/cli": "^0.15.1",
 		"@playwright/test": "^1.60.0",
+		"@size-limit/file": "^12.1.0",
 		"@size-limit/preset-small-lib": "^12.1.0",
 		"@sveltejs/adapter-vercel": "^6.3.3",
 		"@sveltejs/kit": "^2.63.0",

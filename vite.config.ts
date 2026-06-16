@@ -11,7 +11,14 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter()
+			adapter: adapter(),
+			prerender: {
+				handleHttpError: ({ path, message }) => {
+					// OG images are Edge-rendered on-demand; search is SSR-only
+					if (path.startsWith('/og/') || path.includes('/search')) return;
+					throw new Error(message);
+				}
+			}
 		})
 	],
 	test: {
