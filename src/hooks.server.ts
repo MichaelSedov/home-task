@@ -1,6 +1,6 @@
 import type { Handle } from '@sveltejs/kit';
 import { readSession } from '$lib/server/auth/session.js';
-import { isLocale, SUPPORTED_LOCALES } from '$lib/i18n/dict.js';
+import { isLocale } from '$lib/i18n/dict.js';
 import type { Locale } from '$lib/i18n/dict.js';
 
 function detectLang(request: Request, cookies: string | null): Locale {
@@ -34,10 +34,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// security headers
 	const response = await resolve(event, {
 		transformPageChunk({ html }) {
-			return html.replace(
-				'data-theme="light"',
-				`data-theme="${event.locals.theme}"`
-			);
+			return html.replace('data-theme="light"', `data-theme="${event.locals.theme}"`);
 		}
 	});
 

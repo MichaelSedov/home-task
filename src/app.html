@@ -15,7 +15,11 @@
 			(function () {
 				try {
 					var saved = document.cookie.match(/theme=([^;]+)/);
-					var theme = saved ? saved[1] : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+					var theme = saved
+						? saved[1]
+						: matchMedia('(prefers-color-scheme: dark)').matches
+							? 'dark'
+							: 'light';
 					document.documentElement.setAttribute('data-theme', theme);
 				} catch (_) {}
 			})();
@@ -23,7 +27,10 @@
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<!-- skip link for keyboard users -->
-		<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--accent)] focus:text-white focus:rounded-md">
+		<a
+			href="#main-content"
+			class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-[var(--accent)] focus:px-4 focus:py-2 focus:text-white"
+		>
 			Skip to content
 		</a>
 		<div style="display: contents">%sveltekit.body%</div>

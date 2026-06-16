@@ -2,7 +2,15 @@ import { z } from 'zod/v4';
 import { ItemStatusSchema, ItemChannelSchema } from './item.js';
 
 export const SORT_ORDERS = ['asc', 'desc'] as const;
-export const ITEMS_SORT_FIELDS = ['name', 'status', 'channel', 'budget', 'spent', 'ctr', 'updatedAt'] as const;
+export const ITEMS_SORT_FIELDS = [
+	'name',
+	'status',
+	'channel',
+	'budget',
+	'spent',
+	'ctr',
+	'updatedAt'
+] as const;
 export const POSTS_SORT_FIELDS = ['publishedAt', 'readingTimeMinutes'] as const;
 
 export const ItemsQuerySchema = z.object({
@@ -46,10 +54,13 @@ export function parseSearchQuery(params: URLSearchParams): SearchQuery {
 	});
 }
 
-export function toSearchParams(query: Record<string, string | string[] | number | undefined>): URLSearchParams {
+export function toSearchParams(
+	query: Record<string, string | string[] | number | undefined>
+): URLSearchParams {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(query)) {
-		if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) continue;
+		if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0))
+			continue;
 		if (Array.isArray(value)) {
 			value.forEach((v) => params.append(key, v));
 		} else {

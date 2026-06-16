@@ -30,11 +30,15 @@ export function formatDate(iso: string, locale: string): string {
 }
 
 export function formatMoney(value: number, locale: string): string {
-	return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(
-		value
-	);
+	return new Intl.NumberFormat(locale, {
+		style: 'currency',
+		currency: 'USD',
+		maximumFractionDigits: 0
+	}).format(value);
 }
 
 export function formatPercent(value: number, locale: string): string {
-	return new Intl.NumberFormat(locale, { style: 'percent', minimumFractionDigits: 1 }).format(value);
+	return new Intl.NumberFormat(locale, { style: 'percent', minimumFractionDigits: 1 }).format(
+		value
+	);
 }

@@ -15,6 +15,7 @@ export function verifyPassword(user: User, password: string): boolean {
 }
 
 export function toSessionUser(user: User): SessionUser {
-	const { password: _, ...rest } = user;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { password, ...rest } = user;
 	return rest;
 }

@@ -12,7 +12,10 @@ interface SessionPayload {
 async function getKey(): Promise<CryptoKey> {
 	const secret = env.SESSION_SECRET ?? 'dev-secret-change-me';
 	const raw = new TextEncoder().encode(secret);
-	return crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
+	return crypto.subtle.importKey('raw', raw, { name: 'HMAC', hash: 'SHA-256' }, false, [
+		'sign',
+		'verify'
+	]);
 }
 
 async function sign(payload: string): Promise<string> {

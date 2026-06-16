@@ -1,42 +1,200 @@
-# sv
+# Senior Frontend Take-Home — SvelteKit + Tailwind
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A production-shaped slice of a marketing site + authenticated dashboard, built on
+SvelteKit 2 (Svelte 5 runes), TypeScript, and Tailwind. The goal of this submission is
+**finished edges over surface area**: a small set of routes that hold up to a code
+review, with deliberate rendering boundaries, real validation, and CI gates that
+actually fail.
 
-## Creating a project
+- **Live URL:** _to be filled in after deploy_
+- **Demo credentials:** see [Demo accounts](#demo-accounts)
+- **Time spent:** _filled in at submission_
 
-If you're seeing this, you've probably already done this step. Congrats!
+---
 
-```sh
-# create a new project
-npx sv create my-app
+## Run locally
+
+```bash
+cp .env.example .env          # set SESSION_SECRET
+pnpm install
+pnpm dev                      # http://localhost:5173
+pnpm test:unit                # Vitest unit tests
+pnpm test:e2e                 # Playwright e2e tests
+pnpm build                    # production build
+pnpm preview                  # serve the build
+pnpm lhci                     # Lighthouse CI (run after preview)
+pnpm size                     # size-limit check
 ```
 
-To recreate this project with the same configuration:
+Node ≥ 22 required (see `.nvmrc`). The only required environment variable for local
+dev is `SESSION_SECRET` — any 32+ character string works.
 
-```sh
-# recreate this project
-npx sv@0.16.1 create --template minimal --types ts --add prettier eslint vitest="usages:unit" playwright tailwindcss="plugins:none" sveltekit-adapter="adapter:vercel" --no-install .
+## Demo accounts
+
+All three accounts use the password `demo1234`:
+
+| Email              | Role   | What they can do                                                  |
+| ------------------ | ------ | ----------------------------------------------------------------- |
+| `admin@demo.test`  | admin  | Full access; inline-edit any item.                                |
+| `editor@demo.test` | editor | Inline-edit any item.                                             |
+| `viewer@demo.test` | viewer | Read the table; edit controls are hidden and the API returns 403. |
+
+---
+
+## Rendering matrix
+
+Every route makes a deliberate choice. This table is the first thing to read.
+
+| Route                         | Runtime  | Strategy                                 | Why                                                                           |
+| ----------------------------- | -------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| `/`, `/[lang]`                | Node     | **Prerender (SSG)**                      | Static marketing copy, cheapest possible LCP, zero cold start.                |
+| `/[lang]/blog`                | Node     | **Prerender (SSG)**                      | Known content set at build time; pagination is small.                         |
+| `/[lang]/blog/[slug]`         | Node     | **Prerender (SSG)**                      | 20 posts; prerendering beats ISR at this scale.                               |
+| `/[lang]/search`              | **Edge** | SSR, no cache                            | URL is the state; query is unique per request. Edge gives low global latency. |
+| `/og/[slug].png`              | **Edge** | On-demand satori render, immutable cache | Avoids building 20 PNGs; cache key is slug, content is stable.                |
+| `/[lang]/login`               | Node     | SSR + form action                        | Needs `Set-Cookie`; Node keeps cookie/session code boring.                    |
+| `/[lang]/dashboard`           | Node     | SSR + guard                              | Reads session cookie; redirects anonymous traffic.                            |
+| `/[lang]/dashboard/items`     | Node     | **Streamed SSR**                         | Skeleton renders immediately; table body streams in without blocking LCP.     |
+| `/api/items/[id]` (PATCH)     | Node     | JSON endpoint                            | Validates `ItemPatch` with the same Zod schema as the client.                 |
+| `/api/beacon`                 | **Edge** | Accept-and-log                           | RUM/error sink; low latency matters, durability doesn't.                      |
+| `/sitemap.xml`, `/robots.txt` | Node     | Prerendered at build                     | Locale-aware; regenerated on every deploy.                                    |
+
+---
+
+## Architecture
+
+```
+src/
+├── app.html                inlines theme bootstrap (prevents FOUC)
+├── hooks.server.ts         session read, lang detection, security headers
+├── lib/
+│   ├── schemas/            Zod — single source of truth for shapes
+│   │   ├── post.ts
+│   │   ├── item.ts
+│   │   ├── user.ts
+│   │   └── query.ts        URL-state codec (parse + stringify)
+│   ├── server/
+│   │   ├── data/           in-process "API" backed by mocks/*.json
+│   │   ├── auth/           HMAC-signed session cookie
+│   │   └── parse.ts        parseOnce<T> — fail-fast on boot
+│   ├── i18n/
+│   │   ├── dict.ts         loadDict(lang) — 40 lines, no library
+│   │   └── t.ts            interpolation + Intl formatters
+│   ├── ui/                 ~10 primitives + Combobox composite
+│   └── obs/                web-vitals client + error reporter
+└── routes/
+    ├── (marketing)/        public layout — SSG + Edge search
+    ├── (auth)/             protected layout + guard
+    └── api/                beacon, items PATCH
 ```
 
-## Developing
+### State management
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+`$state` runes by default. Svelte stores only where state outlives a component tree
+(toast queue, theme). Context threads `t(...)` and toast API down the tree. The URL is
+the source of truth for filter/sort state; the server is the source of truth for data.
 
-```sh
-npm run dev
+### Data contract
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+`mocks/*.json` is treated as the wire format of a real API:
+
+1. Each JSON file is imported once per module and parsed through a Zod schema.
+   Failures crash the process at boot (fail-fast). We never serve unvalidated rows.
+2. The same `LoginInput` schema is imported on both `+page.svelte` and the form action.
+3. The dashboard PATCH endpoint validates with the same `ItemPatch` schema as the client.
+4. Mutations call `invalidate('items:list')` — not the whole tree.
+
+### Optimistic UI (inline edit)
+
+1. Cell edit committed → row mutated in `$state` immediately.
+2. `fetch PATCH /api/items/:id` fires with an `AbortController` tied to the row.
+3. `2xx` → `invalidate('items:list')` to reconcile.
+4. `4xx`/`5xx` or abort → revert to pre-edit snapshot + toast with retry.
+5. Second edit on same row aborts the in-flight request. Last-write-wins, no race.
+6. `viewer` role: edit controls hidden client-side **and** API returns 403.
+
+### Authentication
+
+- HMAC-SHA-256 signed cookie: `base64(payload).signature`, `HttpOnly; Secure; SameSite=Lax`.
+- `hooks.server.ts` reads and verifies on every request → `event.locals.user`.
+- `(auth)/+layout.server.ts` redirects to `/login?redirectTo=...` when `user` is null.
+
+### Internationalization
+
+- Locale in URL: `/en/...` and `/de/...`. Root `/` resolves via cookie → `Accept-Language` → `en`.
+- Custom `t(key, vars)` (≈40 lines). No library. Dev warns on missing keys/placeholders.
+- `Intl.DateTimeFormat` for dates, `Intl.NumberFormat` for money/CTR.
+- `<link rel="alternate" hreflang>` and per-locale canonicals in the marketing layout.
+
+### Design system
+
+- Tokens defined as CSS variables on `:root` / `[data-theme="dark"]`.
+- Tailwind `@theme` maps `bg-bg-elev`, `text-fg`, `text-accent`, etc. onto those variables.
+- Dark mode is a single attribute switch, not parallel class lists.
+- Theme persisted in cookie, read in SSR, set before hydration → no FOUC.
+- 10 primitives: `Button`, `Input`, `Select`, `Card`, `Badge`, `Container`, `Heading`, `Toast`, `Skeleton`, `Avatar`.
+- 1 composite from scratch: `Combobox` — keyboard model, focus trap, ARIA.
+
+---
+
+## Performance budgets (enforced in CI)
+
+| Metric                                        | Budget        | Tool          |
+| --------------------------------------------- | ------------- | ------------- |
+| LCP (mobile)                                  | < 2.0 s       | Lighthouse CI |
+| CLS                                           | < 0.1         | Lighthouse CI |
+| INP                                           | < 200 ms      | Lighthouse CI |
+| Lighthouse Perf / A11y / SEO / Best Practices | ≥ 95          | Lighthouse CI |
+| Initial JS (public surface)                   | ≤ 80 KB gzip  | size-limit    |
+| Initial JS (dashboard)                        | ≤ 150 KB gzip | size-limit    |
+
+---
+
+## Testing
+
+| Layer                  | What                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Vitest ≥ 5             | URL-state codec · Zod schemas reject bad input · Combobox keyboard · Toast auto-dismiss · `formatMoney` EN/DE |
+| Playwright flow 1      | Anonymous: home → search → open post                                                                          |
+| Playwright flow 2      | Auth: login → dashboard → edit row → server 500 → assert rollback + toast                                     |
+| `@axe-core/playwright` | Asserted on `/dashboard/items`                                                                                |
+| Visual regression      | Playwright snapshot of `Combobox` open state                                                                  |
+
+---
+
+## CI pipeline
+
+```
+lint → svelte-check + tsc --noEmit → vitest → build → playwright → lhci → size-limit
 ```
 
-## Building
+Husky + lint-staged run Prettier + ESLint on staged files before commit (< 2 s).
 
-To create a production version of your app:
+---
 
-```sh
-npm run build
-```
+## Trade-offs
 
-You can preview the production build with `npm run preview`.
+1. **No i18n library.** 40 keys, 40 lines. `paraglide` adds runtime weight we don't need.
+2. **No DB.** `items.json` is loaded once, filtered in memory. For 220 rows this is faster
+   than any DB round-trip. Swapping to Postgres is a one-file change in `lib/server/data/items.ts`.
+3. **Streamed SSR only on dashboard.** Marketing pages prerender — nothing to stream.
+4. **Cookie sessions, not JWT.** HttpOnly, no XSS risk, no refresh-token machinery needed.
+5. **Combobox from scratch.** The brief asks for it explicitly. Building it is the point.
+6. **One linear CI workflow.** Easier to read and debug than a fan-out matrix at this scale.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+---
+
+## What's next
+
+- Swap data layer for Postgres + Drizzle (one-file change behind the same interface).
+- Real Sentry transport on the beacon endpoint.
+- Image pipeline: AVIF/WebP `srcset`, LQIP, priority hints.
+- View Transitions API on blog index ↔ post navigation.
+- Feature flag wired through SSR cookie with no client flicker.
+
+---
+
+## Conventions
+
+- Atomic commits. Each commit passes `lint + typecheck + unit` on its own.
+- Conventional Commits: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`.

@@ -1,5 +1,11 @@
 import { z } from 'zod/v4';
-import { ItemSchema, type Item, type ItemPatch, type ItemStatus, type ItemChannel } from '$lib/schemas/item.js';
+import {
+	ItemSchema,
+	type Item,
+	type ItemPatch,
+	type ItemStatus,
+	type ItemChannel
+} from '$lib/schemas/item.js';
 import { parseOnce } from '../parse.js';
 import type { ItemsQuery } from '$lib/schemas/query.js';
 import rawItems from '../../../../mocks/items.json' with { type: 'json' };
@@ -18,7 +24,7 @@ export function listItems(query: ItemsQuery): ItemsPage {
 	const { page, pageSize, sort, order, status, channel, q } = query;
 	const needle = q.toLowerCase().trim();
 
-	let rows = store.filter((item) => {
+	const rows = store.filter((item) => {
 		if (status.length && !status.includes(item.status as ItemStatus)) return false;
 		if (channel.length && !channel.includes(item.channel as ItemChannel)) return false;
 		if (needle && !item.name.toLowerCase().includes(needle)) return false;

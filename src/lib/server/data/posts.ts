@@ -26,7 +26,7 @@ export function searchPosts(opts: SearchOptions): Post[] {
 	const { q = '', tag = '', sort = 'publishedAt', order = 'desc', lang = 'en' } = opts;
 	const needle = q.toLowerCase().trim();
 
-	let result = posts.filter((p) => {
+	const result = posts.filter((p) => {
 		if (tag && !p.tags.includes(tag)) return false;
 		if (needle) {
 			const t = p.translations[lang] ?? p.translations['en'];
