@@ -36,7 +36,14 @@ export default defineConfig(
 	{
 		rules: {
 			// +error.svelte is an error boundary — a full-page navigation is intentional
-			'svelte/no-navigation-without-resolve': 'off'
+			'svelte/no-navigation-without-resolve': 'off',
+			// Allow _-prefixed vars as intentional placeholders (e.g. {#each} iterators)
+			'@typescript-eslint/no-unused-vars': [
+				'error',
+				{ argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+			],
+			// Downgrade to warn: we use URLSearchParams locally, not in $state
+			'svelte/prefer-svelte-reactivity': 'warn'
 		}
 	}
 );
