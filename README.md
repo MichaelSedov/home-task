@@ -16,14 +16,14 @@ actually fail.
 
 ```bash
 cp .env.example .env          # set SESSION_SECRET
-pnpm install
-pnpm dev                      # http://localhost:5173
-pnpm test:unit                # Vitest unit tests
-pnpm test:e2e                 # Playwright e2e tests
-pnpm build                    # production build
-pnpm preview                  # serve the build
-pnpm lhci                     # Lighthouse CI (run after preview)
-pnpm size                     # size-limit check
+npm install
+npm run dev                   # http://localhost:5173
+npm run test:unit             # Vitest unit tests
+npm run test:e2e              # Playwright e2e tests
+npm run build                 # production build
+npm run preview               # serve the build
+npm run lhci                  # Lighthouse CI (run after preview)
+npm run size                  # size-limit check
 ```
 
 Node ≥ 22 required (see `.nvmrc`). The only required environment variable for local

@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
 	webServer: {
 		command:
-			'SESSION_SECRET=e2e-test-secret-minimum-32-chars pnpm build && SESSION_SECRET=e2e-test-secret-minimum-32-chars pnpm preview',
+			'SESSION_SECRET=e2e-test-secret-minimum-32-chars npm run build && SESSION_SECRET=e2e-test-secret-minimum-32-chars npm run preview',
 		port: 4173,
 		reuseExistingServer: !process.env.CI
 	},

@@ -14,7 +14,7 @@
 		"format": "prettier --write .",
 		"test:unit": "vitest --run",
 		"test:e2e": "playwright test",
-		"test": "pnpm test:unit && pnpm test:e2e",
+		"test": "npm run test:unit && npm run test:e2e",
 		"lhci": "lhci autorun",
 		"size": "size-limit"
 	},

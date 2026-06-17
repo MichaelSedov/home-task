@@ -20,45 +20,42 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
+          cache: npm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       # ── 1. Lint + format ──────────────────────────────────────────────────
       - name: Lint
-        run: pnpm lint
+        run: npm run lint
 
       # ── 2. Type-check ─────────────────────────────────────────────────────
       - name: Type-check
-        run: pnpm exec svelte-kit sync && pnpm exec tsc --noEmit
+        run: npx svelte-kit sync && npx tsc --noEmit
 
       # ── 3. svelte-check ───────────────────────────────────────────────────
       - name: svelte-check
-        run: pnpm exec svelte-check
+        run: npx svelte-check
 
       # ── 4. Unit tests ─────────────────────────────────────────────────────
       - name: Unit tests
-        run: pnpm test:unit
+        run: npm run test:unit
 
       # ── 5. Build ──────────────────────────────────────────────────────────
       - name: Build
-        run: pnpm build
+        run: npm run build
 
       # ── 6. Bundle size (blocks PR on regression) ──────────────────────────
       - name: Bundle size check
-        run: pnpm size
+        run: npm run size
 
       # ── 7. Playwright install ─────────────────────────────────────────────
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       # ── 8. E2E tests ──────────────────────────────────────────────────────
       - name: E2E tests
-        run: pnpm test:e2e
+        run: npm run test:e2e
         env:
           CI: true
 
@@ -72,6 +69,6 @@ jobs:
 
       # ── 9. Lighthouse CI (blocks PR on regression) ────────────────────────
       - name: Lighthouse CI
-        run: pnpm exec lhci autorun
+        run: npx lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

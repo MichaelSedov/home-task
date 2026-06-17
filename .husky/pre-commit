@@ -1,1 +1,6 @@
-pnpm exec lint-staged
+# Load nvm if available so we use the project's Node version (see .nvmrc)
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/nvm.sh" ] && nvm use --silent 2>/dev/null || true
+
+npx lint-staged

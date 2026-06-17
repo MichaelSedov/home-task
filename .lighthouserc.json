@@ -1,7 +1,7 @@
 {
 	"ci": {
 		"collect": {
-			"startServerCommand": "SESSION_SECRET=lhci-secret-minimum-32-chars pnpm preview",
+			"startServerCommand": "SESSION_SECRET=lhci-secret-minimum-32-chars npm run preview",
 			"startServerReadyPattern": "Local:",
 			"url": [
 				"http://localhost:4173/en",
