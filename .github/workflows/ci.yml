@@ -48,10 +48,9 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # ── 6. Bundle size ────────────────────────────────────────────────────
+      # ── 6. Bundle size (blocks PR on regression) ──────────────────────────
       - name: Bundle size check
         run: pnpm size
-        continue-on-error: true # warn but don't fail on first deploy
 
       # ── 7. Playwright install ─────────────────────────────────────────────
       - name: Install Playwright browsers
@@ -71,10 +70,8 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
-      # ── 9. Lighthouse CI ─────────────────────────────────────────────────
+      # ── 9. Lighthouse CI (blocks PR on regression) ────────────────────────
       - name: Lighthouse CI
-        run: |
-          pnpm build
-          pnpm exec lhci autorun || true   # advisory until budgets are tuned
+        run: pnpm exec lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

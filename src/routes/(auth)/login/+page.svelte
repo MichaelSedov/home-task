@@ -1,20 +1,44 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { LoginInputSchema } from '$lib/schemas/user.js';
 	import Input from '$lib/ui/primitives/Input.svelte';
 	import Button from '$lib/ui/primitives/Button.svelte';
 	import Card from '$lib/ui/primitives/Card.svelte';
 
 	let { form } = $props();
 
-	// i18n minimal inline (login page may appear before marketing layout dict loads)
 	const dict: Record<string, string> = {
 		'login.title': 'Sign in',
 		'login.email': 'Email',
 		'login.password': 'Password',
 		'login.submit': 'Sign in',
-		'login.error': 'Invalid email or password.'
+		'login.error': 'Invalid email or password.',
+		'login.emailRequired': 'Enter a valid email address.',
+		'login.passwordRequired': 'Enter your password.'
 	};
 	const t = (k: string) => dict[k] ?? k;
+
+	// Client-side state mirrors what the server action will receive.
+	let email = $state('');
+	let password = $state('');
+	let emailError = $state<string | null>(null);
+	let passwordError = $state<string | null>(null);
+	let submitting = $state(false);
+
+	function validate(): boolean {
+		// Use the SAME schema as the server action (lib/schemas/user.ts).
+		const result = LoginInputSchema.safeParse({ email, password });
+		emailError = null;
+		passwordError = null;
+		if (result.success) return true;
+
+		for (const issue of result.error.issues) {
+			const field = issue.path[0];
+			if (field === 'email') emailError = t('login.emailRequired');
+			if (field === 'password') passwordError = t('login.passwordRequired');
+		}
+		return false;
+	}
 </script>
 
 <svelte:head>
@@ -35,15 +59,30 @@
 			</div>
 		{/if}
 
-		<form method="POST" use:enhance class="flex flex-col gap-4">
+		<form
+			method="POST"
+			class="flex flex-col gap-4"
+			use:enhance={({ cancel }) => {
+				if (!validate()) {
+					cancel();
+					return;
+				}
+				submitting = true;
+				return async ({ update }) => {
+					await update();
+					submitting = false;
+				};
+			}}
+		>
 			<Input
 				label={t('login.email')}
 				type="email"
 				name="email"
 				id="email"
 				autocomplete="email"
-				required
 				placeholder="you@demo.test"
+				bind:value={email}
+				error={emailError ?? undefined}
 			/>
 			<Input
 				label={t('login.password')}
@@ -51,10 +90,11 @@
 				name="password"
 				id="password"
 				autocomplete="current-password"
-				required
+				bind:value={password}
+				error={passwordError ?? undefined}
 			/>
-			<Button type="submit" variant="primary" class="mt-2 w-full">
-				{t('login.submit')}
+			<Button type="submit" variant="primary" class="mt-2 w-full" disabled={submitting}>
+				{submitting ? '…' : t('login.submit')}
 			</Button>
 		</form>
 

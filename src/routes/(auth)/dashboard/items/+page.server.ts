@@ -5,11 +5,14 @@ import { requireUser } from '$lib/server/auth/guard.js';
 
 export const load: PageServerLoad = async (event) => {
 	requireUser(event);
+
+	// Tag this loader so PATCH /api/items/[id] can invalidate it on success.
+	event.depends('items:list');
+
 	const query = parseItemsQuery(event.url.searchParams);
 
-	// Streamed: skeleton renders immediately, rows resolve async
+	// Streamed: skeleton renders immediately, rows resolve async.
 	const rowsPromise = new Promise<ReturnType<typeof listItems>>((resolve) => {
-		// Simulate async data fetch; in real app this would be a DB query
 		resolve(listItems(query));
 	});
 

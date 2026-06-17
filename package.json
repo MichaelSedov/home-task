@@ -29,9 +29,18 @@
 	},
 	"size-limit": [
 		{
-			"name": "Entry JS (public surface)",
+			"name": "Public entry chunk",
 			"path": ".svelte-kit/output/client/_app/immutable/entry/*.js",
-			"limit": "120 KB",
+			"limit": "100 KB",
+			"gzip": true
+		},
+		{
+			"name": "Public app shell (entry + shared chunks)",
+			"path": [
+				".svelte-kit/output/client/_app/immutable/entry/*.js",
+				".svelte-kit/output/client/_app/immutable/chunks/*.js"
+			],
+			"limit": "320 KB",
 			"gzip": true
 		}
 	],
@@ -46,12 +55,16 @@
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.0",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/svelte": "^5.3.1",
+		"@testing-library/user-event": "^14.6.1",
 		"@types/node": "^20",
 		"eslint": "^10.4.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.19.0",
 		"globals": "^17.6.0",
 		"husky": "^9.1.7",
+		"jsdom": "^29.1.1",
 		"lint-staged": "^17.0.7",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^4.1.0",

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getT, getLang } from '$lib/i18n/context.js';
+	import Avatar from '$lib/ui/primitives/Avatar.svelte';
 	import Badge from '$lib/ui/primitives/Badge.svelte';
-	import Button from '$lib/ui/primitives/Button.svelte';
 	import Card from '$lib/ui/primitives/Card.svelte';
 
 	let { data } = $props();
@@ -63,6 +63,28 @@
 			features: ['Unlimited everything', 'SSO', 'SLA', 'Dedicated support']
 		}
 	];
+
+	const testimonials = [
+		{
+			quote:
+				'We rebuilt our marketing site on this stack and cut LCP from 3.4s to 0.8s. The team stopped fighting the framework.',
+			author: 'Omar Haddad',
+			role: 'Staff Engineer, Northwind'
+		},
+		{
+			quote:
+				"Tokens, runes, and streamed loads — these aren't novelty, they're how I want every project to feel.",
+			author: 'Anna Becker',
+			role: 'Design Engineer, Hyperion'
+		},
+		{
+			quote: "Our team's pull request reviews got noticeably shorter. The code reads itself.",
+			author: 'Marek Dvořák',
+			role: 'Tech Lead, Outpost'
+		}
+	];
+
+	const trustedBy = ['Acme', 'Hyperion', 'Northwind', 'Outpost', 'Vega', 'Lumen'];
 </script>
 
 <svelte:head>
@@ -98,12 +120,18 @@
 		</h1>
 		<p class="mb-8 text-xl text-[var(--muted)]">{t('home.hero.subtitle')}</p>
 		<div class="flex flex-wrap items-center justify-center gap-3">
-			<Button variant="primary" size="lg">
-				<a href="/{lang}/blog">{t('home.hero.cta')}</a>
-			</Button>
-			<Button variant="secondary" size="lg">
-				<a href="/login">Sign in</a>
-			</Button>
+			<a
+				href="/{lang}/blog"
+				class="inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[var(--accent)] px-6 py-3 text-base font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+			>
+				{t('home.hero.cta')}
+			</a>
+			<a
+				href="/login"
+				class="inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-soft)] px-6 py-3 text-base font-medium text-[var(--fg)] transition-all duration-150 hover:bg-[var(--border)] active:scale-[0.98]"
+			>
+				Sign in
+			</a>
 		</div>
 	</div>
 </section>
@@ -154,11 +182,57 @@
 							</li>
 						{/each}
 					</ul>
-					<Button variant={plan.highlight ? 'primary' : 'secondary'} class="mt-6 w-full">
+					<a
+						href="/login"
+						class="mt-6 inline-flex w-full items-center justify-center rounded-[var(--radius-sm)] px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.98] {plan.highlight
+							? 'bg-[var(--accent)] text-white hover:opacity-90'
+							: 'border border-[var(--border)] bg-[var(--bg-soft)] text-[var(--fg)] hover:bg-[var(--border)]'}"
+					>
 						Get started
-					</Button>
+					</a>
 				</Card>
 			{/each}
 		</div>
+	</div>
+</section>
+
+<!-- Social proof -->
+<section aria-labelledby="social-proof-heading" class="px-6 py-20">
+	<div class="mx-auto max-w-5xl">
+		<h2 id="social-proof-heading" class="sr-only">Customer testimonials</h2>
+
+		<p class="mb-8 text-center text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+			Trusted by teams at
+		</p>
+		<ul
+			class="mb-16 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70"
+			role="list"
+		>
+			{#each trustedBy as company (company)}
+				<li class="text-lg font-semibold tracking-tight text-[var(--fg-2)]">{company}</li>
+			{/each}
+		</ul>
+
+		<ul class="grid gap-6 md:grid-cols-3" role="list">
+			{#each testimonials as t2 (t2.author)}
+				<li>
+					<Card class="h-full p-6">
+						<p class="mb-4 text-sm leading-relaxed text-[var(--fg-2)]">
+							<span aria-hidden="true" class="mr-1 text-[var(--accent)]">“</span>{t2.quote}<span
+								aria-hidden="true"
+								class="text-[var(--accent)]">”</span
+							>
+						</p>
+						<div class="flex items-center gap-3 border-t border-[var(--border)] pt-4">
+							<Avatar name={t2.author} size="md" />
+							<div>
+								<p class="text-sm font-medium text-[var(--fg)]">{t2.author}</p>
+								<p class="text-xs text-[var(--muted)]">{t2.role}</p>
+							</div>
+						</div>
+					</Card>
+				</li>
+			{/each}
+		</ul>
 	</div>
 </section>

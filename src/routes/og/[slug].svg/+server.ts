@@ -8,7 +8,10 @@ export const GET: RequestHandler = ({ params }) => {
 	const title = post?.translations['en']?.title ?? params.slug;
 	const color = post?.coverColor ?? '#6d28d9';
 
-	// Minimal SVG OG image — replace with satori for production
+	// Dynamic OG image as SVG. Some platforms (Facebook, X, LinkedIn) do not render SVG
+	// in og:image previews — for production, swap this for satori + @resvg/resvg-wasm
+	// to emit PNG, keeping the same per-slug cache key. The shape of the data and the
+	// edge runtime stay the same.
 	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="${color}"/>
   <rect x="60" y="60" width="1080" height="510" rx="24" fill="rgba(0,0,0,0.45)"/>

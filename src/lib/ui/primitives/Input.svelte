@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
-	interface Props extends HTMLInputAttributes {
+	interface Props extends Omit<HTMLInputAttributes, 'value'> {
 		label?: string;
 		error?: string;
+		value?: string;
 	}
 
-	let { label, error, id, class: className = '', ...rest }: Props = $props();
+	let { label, error, id, class: className = '', value = $bindable(''), ...rest }: Props = $props();
 
-	// Use $derived so inputId re-evaluates if id prop changes
 	const inputId = $derived(id ?? `input-${Math.random().toString(36).slice(2, 8)}`);
 </script>
 
@@ -18,6 +18,7 @@
 	{/if}
 	<input
 		{...rest}
+		bind:value
 		id={inputId}
 		aria-invalid={error ? 'true' : undefined}
 		aria-describedby={error ? `${inputId}-err` : undefined}

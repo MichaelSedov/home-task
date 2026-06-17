@@ -24,9 +24,17 @@
 	function applyFilters() {
 		const p = new URLSearchParams();
 		if (q) p.set('q', q);
-		if (selectedTags.length === 1) p.set('tag', selectedTags[0]);
+		// pass first tag only (server supports one at a time)
+		if (selectedTags.length > 0) p.set('tag', selectedTags[0]);
 		goto(`/${lang}/search?${p}`, { replaceState: true, keepFocus: true });
 	}
+
+	const activeFilters = $derived(data.query.q || data.query.tag);
+	const resultLabel = $derived(
+		data.query.q && data.query.tag
+			? `${data.query.q} + ${data.query.tag}`
+			: data.query.q || data.query.tag
+	);
 
 	function onTagChange(vals: string[]) {
 		selectedTags = vals;
@@ -49,9 +57,9 @@
 <div class="mx-auto max-w-4xl px-6 py-16">
 	<h1 class="mb-8 text-3xl font-extrabold text-[var(--fg)]">{t('nav.search')}</h1>
 
-	<!-- Filters -->
-	<div class="mb-8 flex flex-col gap-4 sm:flex-row">
-		<div class="flex-1">
+	<!-- Filters — items-start prevents search input stretching when Combobox grows -->
+	<div class="mb-4 flex flex-col items-start gap-3 sm:flex-row">
+		<div class="flex-1 self-stretch">
 			<label for="search-q" class="sr-only">{t('search.placeholder')}</label>
 			<input
 				id="search-q"
@@ -59,10 +67,10 @@
 				value={q}
 				oninput={onQueryInput}
 				placeholder={t('search.placeholder')}
-				class="w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-2.5 text-sm text-[var(--fg)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
+				class="h-full min-h-[42px] w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-elev)] px-4 py-2.5 text-sm text-[var(--fg)] placeholder:text-[var(--muted)] outline-none focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
 			/>
 		</div>
-		<div class="w-full sm:w-56">
+		<div class="w-full sm:w-60">
 			<Combobox
 				options={tagOptions}
 				bind:selected={selectedTags}
@@ -73,13 +81,10 @@
 	</div>
 
 	<!-- Results count -->
-	{#if data.query.q || data.query.tag}
+	{#if activeFilters}
 		<p class="mb-6 text-sm text-[var(--muted)]" aria-live="polite">
 			{#if data.results.length > 0}
-				{t('search.results', {
-					count: String(data.results.length),
-					query: data.query.q || data.query.tag
-				})}
+				{t('search.results', { count: String(data.results.length), query: resultLabel ?? '' })}
 			{:else}
 				{t('search.noResults')}
 			{/if}

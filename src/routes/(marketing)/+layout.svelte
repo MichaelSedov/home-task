@@ -15,8 +15,17 @@
 	const lang = $derived(data.lang);
 	const user = $derived(data.user);
 
-	// Build nav links with locale prefix
 	const prefix = $derived(`/${lang}`);
+
+	// Swap /en ↔ /de robustly — replace only the leading segment
+	const otherLang = $derived(lang === 'en' ? 'de' : 'en');
+	const localeSwitchHref = $derived(() => {
+		const path = $page.url.pathname;
+		// replace leading /en or /de, fall back to switching root
+		if (path.startsWith('/en')) return path.replace(/^\/en/, '/de');
+		if (path.startsWith('/de')) return path.replace(/^\/de/, '/en');
+		return `/${otherLang}`;
+	});
 
 	// Theme toggle
 	function toggleTheme() {
@@ -58,13 +67,11 @@
 
 				<!-- Locale switcher -->
 				<a
-					href={lang === 'en'
-						? $page.url.pathname.replace('/en', '/de')
-						: $page.url.pathname.replace('/de', '/en')}
+					href={localeSwitchHref()}
 					class="rounded-md px-2 py-1 text-xs font-medium text-[var(--muted)] hover:bg-[var(--bg-soft)] hover:text-[var(--fg)]"
-					hreflang={lang === 'en' ? 'de' : 'en'}
+					hreflang={otherLang}
 				>
-					{lang === 'en' ? 'DE' : 'EN'}
+					{otherLang.toUpperCase()}
 				</a>
 
 				{#if user}
