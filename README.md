@@ -6,7 +6,7 @@ SvelteKit 2 (Svelte 5 runes), TypeScript, and Tailwind. The goal of this submiss
 review, with deliberate rendering boundaries, real validation, and CI gates that
 actually fail.
 
-- **Live URL:** _to be filled in after deploy_
+- **Live URL:** https://home-task-red.vercel.app
 - **Demo credentials:** see [Demo accounts](#demo-accounts)
 - **Time spent:** ~8–10 hours
 
