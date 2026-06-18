@@ -1,17 +1,21 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Visual regression', () => {
+	// Visual snapshots are platform-specific (font-rendering, anti-aliasing).
+	// The committed baselines were captured on darwin; running them in Linux CI
+	// would always diff. They guard against local design regressions during
+	// development. The proper fix is generating per-OS baselines via Docker —
+	// deliberately out of scope for this submission.
+	test.skip(!!process.env.CI, 'Visual snapshots are local-only (darwin baselines).');
+
 	test('combobox open state snapshot', async ({ page }) => {
 		await page.goto('/en/search');
 
-		// Open the tag combobox
 		const combobox = page.getByRole('combobox', { name: /tag|filter/i }).first();
 		await combobox.click();
 
-		// Wait for dropdown to appear
 		await expect(page.getByRole('listbox')).toBeVisible();
 
-		// Snapshot just the combobox container
 		const container = page.locator('[data-combobox]').first();
 		await expect(container).toHaveScreenshot('combobox-open.png', { maxDiffPixels: 50 });
 	});
