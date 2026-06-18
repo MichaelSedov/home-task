@@ -24,8 +24,9 @@
 		onchange
 	}: Props = $props();
 
-	const comboId = rootId ?? `combo-${Math.random().toString(36).slice(2, 8)}`;
-	const listId = `${comboId}-list`;
+	// rootId is a one-shot prop; this id stays stable for the component's lifetime
+	const comboId = $derived(rootId ?? `combo-${Math.random().toString(36).slice(2, 8)}`);
+	const listId = $derived(`${comboId}-list`);
 
 	let open = $state(false);
 	let query = $state('');
@@ -161,25 +162,19 @@
 		>
 	</div>
 
-	{#if selected.length > 0}
-		<div class="flex flex-wrap gap-1" role="group" aria-label="Selected items">
-			{#each selected as val (val)}
-				{@const opt = options.find((o) => o.value === val)}
-				<span
-					class="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--accent-soft)] px-2 py-0.5 text-xs text-[var(--accent-ink)]"
-				>
-					{opt?.label ?? val}
-					<button
-						type="button"
-						aria-label="Remove {opt?.label ?? val}"
-						onclick={() => toggle(val)}
-						class="ml-0.5 rounded-full hover:bg-[var(--accent)] hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
-						>✕</button
-					>
-				</span>
-			{/each}
-		</div>
-	{/if}
+	<!--
+		Selected values are conveyed by the input (single value or "N selected") and
+		by check-marks inside the open listbox. Inline chips below the input were
+		causing layout shift in filter rows; removing them keeps the field a fixed
+		height while preserving full multi-select control via the dropdown.
+	-->
+	<!-- Live region announces selection changes to screen readers -->
+	<span class="sr-only" aria-live="polite">
+		{#if selected.length > 0}
+			{selected.length}
+			{selected.length === 1 ? 'option' : 'options'} selected
+		{/if}
+	</span>
 
 	{#if open}
 		<ul
@@ -198,6 +193,12 @@
 				{#each filtered as opt, i (opt.value)}
 					{@const isSelected = selected.includes(opt.value)}
 					{@const isActive = i === activeIdx}
+					<!--
+						Keyboard handling for these options lives on the combobox input
+						(ArrowUp/Down/Home/End/Enter/Esc) via aria-activedescendant — this
+						is the ARIA combobox pattern. The <li> takes mouse clicks only.
+					-->
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
 					<li
 						id="{comboId}-opt-{opt.value}"
 						role="option"
