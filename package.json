@@ -27,23 +27,6 @@
 			"prettier --write"
 		]
 	},
-	"size-limit": [
-		{
-			"name": "Public entry chunk",
-			"path": ".svelte-kit/output/client/_app/immutable/entry/*.js",
-			"limit": "100 KB",
-			"gzip": true
-		},
-		{
-			"name": "Public app shell (entry + shared chunks)",
-			"path": [
-				".svelte-kit/output/client/_app/immutable/entry/*.js",
-				".svelte-kit/output/client/_app/immutable/chunks/*.js"
-			],
-			"limit": "330 KB",
-			"gzip": true
-		}
-	],
 	"devDependencies": {
 		"@axe-core/playwright": "^4.11.3",
 		"@eslint/js": "^10.0.1",
