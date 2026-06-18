@@ -24,6 +24,7 @@
 				"render-blocking-insight": "off",
 				"network-dependency-tree-insight": "off",
 				"dom-size-insight": "off",
+				"forced-reflow-insight": "off",
 				"unused-javascript": "off",
 				"uses-text-compression": "off",
 				"errors-in-console": "off",
