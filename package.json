@@ -16,7 +16,7 @@
 		"test:e2e": "playwright test",
 		"test": "npm run test:unit && npm run test:e2e",
 		"lhci": "lhci autorun",
-		"size": "size-limit"
+		"size": "node scripts/check-size.mjs"
 	},
 	"lint-staged": {
 		"*.{ts,js,svelte}": [
