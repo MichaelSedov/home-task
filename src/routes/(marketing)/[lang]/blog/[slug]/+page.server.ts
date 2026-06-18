@@ -24,7 +24,7 @@ export const load: PageServerLoad = ({ params, url }) => {
 		url: url.href,
 		publishedAt: post.publishedAt,
 		author: post.author.name,
-		image: `${url.origin}/og/${post.slug}.svg`
+		image: `${url.origin}/og/${post.slug}.png`
 	});
 
 	return {
@@ -35,6 +35,6 @@ export const load: PageServerLoad = ({ params, url }) => {
 			body: translation.body
 		},
 		jsonLd,
-		ogImage: `${url.origin}/og/${post.slug}.svg`
+		ogImage: `${url.origin}/og/${post.slug}.png`
 	};
 };

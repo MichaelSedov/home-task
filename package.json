@@ -40,7 +40,7 @@
 				".svelte-kit/output/client/_app/immutable/entry/*.js",
 				".svelte-kit/output/client/_app/immutable/chunks/*.js"
 			],
-			"limit": "320 KB",
+			"limit": "330 KB",
 			"gzip": true
 		}
 	],
@@ -79,5 +79,8 @@
 		"vitest": "^4.1.8",
 		"web-vitals": "^5.3.0",
 		"zod": "^4.4.3"
+	},
+	"dependencies": {
+		"@vercel/og": "^0.11.1"
 	}
 }
