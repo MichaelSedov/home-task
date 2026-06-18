@@ -9,90 +9,67 @@
 	const lang = getLang();
 	const jsonLdTag = `<script type="application/ld+json">${data.jsonLd}<` + `/script>`;
 
-	const features = [
-		{
-			icon: '⚡',
-			title: 'Edge-first rendering',
-			desc: 'SSG for marketing, streamed SSR for dashboard. Every route gets the right strategy.'
-		},
-		{
-			icon: '🔒',
-			title: 'Auth built-in',
-			desc: 'HMAC-signed sessions, role-based access, and server-validated forms out of the box.'
-		},
-		{
-			icon: '🌍',
-			title: 'Internationalised',
-			desc: 'EN and DE with locale-aware URLs, hreflang, and Intl formatters throughout.'
-		},
-		{
-			icon: '📊',
-			title: 'Data table',
-			desc: 'Paginated, sorted, filtered table of 220 rows with optimistic inline editing.'
-		},
-		{
-			icon: '♿',
-			title: 'Accessible by default',
-			desc: 'Semantic HTML, keyboard navigation, WCAG AA contrast, axe-clean E2E tests.'
-		},
-		{
-			icon: '🚀',
-			title: 'Performance budgeted',
-			desc: 'LCP < 2s, CLS < 0.1, INP < 200ms — enforced in CI, not just measured.'
-		}
-	];
+	// All copy is driven by i18n keys so switching /en ↔ /de re-renders content
+	const features = $derived([
+		{ icon: '⚡', title: t('home.features.edge.title'), desc: t('home.features.edge.desc') },
+		{ icon: '🔒', title: t('home.features.auth.title'), desc: t('home.features.auth.desc') },
+		{ icon: '🌍', title: t('home.features.i18n.title'), desc: t('home.features.i18n.desc') },
+		{ icon: '📊', title: t('home.features.table.title'), desc: t('home.features.table.desc') },
+		{ icon: '♿', title: t('home.features.a11y.title'), desc: t('home.features.a11y.desc') },
+		{ icon: '🚀', title: t('home.features.perf.title'), desc: t('home.features.perf.desc') }
+	]);
 
-	const pricing = [
+	const pricing = $derived([
 		{
-			name: 'Starter',
-			price: '$0',
-			desc: 'For personal projects',
-			features: ['3 campaigns', '1 user', 'Community support']
+			name: t('home.pricing.starter.name'),
+			price: t('home.pricing.starter.price'),
+			desc: t('home.pricing.starter.desc'),
+			features: [
+				t('home.pricing.starter.f1'),
+				t('home.pricing.starter.f2'),
+				t('home.pricing.starter.f3')
+			]
 		},
 		{
-			name: 'Pro',
-			price: '$49/mo',
-			desc: 'For growing teams',
-			features: ['Unlimited campaigns', '10 users', 'Priority support', 'Analytics'],
+			name: t('home.pricing.pro.name'),
+			price: t('home.pricing.pro.price'),
+			desc: t('home.pricing.pro.desc'),
+			features: [
+				t('home.pricing.pro.f1'),
+				t('home.pricing.pro.f2'),
+				t('home.pricing.pro.f3'),
+				t('home.pricing.pro.f4')
+			],
 			highlight: true
 		},
 		{
-			name: 'Enterprise',
-			price: 'Custom',
-			desc: 'For large organisations',
-			features: ['Unlimited everything', 'SSO', 'SLA', 'Dedicated support']
+			name: t('home.pricing.ent.name'),
+			price: t('home.pricing.ent.price'),
+			desc: t('home.pricing.ent.desc'),
+			features: [
+				t('home.pricing.ent.f1'),
+				t('home.pricing.ent.f2'),
+				t('home.pricing.ent.f3'),
+				t('home.pricing.ent.f4')
+			]
 		}
-	];
+	]);
 
-	const testimonials = [
-		{
-			quote:
-				'We rebuilt our marketing site on this stack and cut LCP from 3.4s to 0.8s. The team stopped fighting the framework.',
-			author: 'Omar Haddad',
-			role: 'Staff Engineer, Northwind'
-		},
-		{
-			quote:
-				"Tokens, runes, and streamed loads — these aren't novelty, they're how I want every project to feel.",
-			author: 'Anna Becker',
-			role: 'Design Engineer, Hyperion'
-		},
-		{
-			quote: "Our team's pull request reviews got noticeably shorter. The code reads itself.",
-			author: 'Marek Dvořák',
-			role: 'Tech Lead, Outpost'
-		}
-	];
+	const testimonials = $derived([
+		{ quote: t('home.social.t1.quote'), author: 'Omar Haddad', role: t('home.social.t1.role') },
+		{ quote: t('home.social.t2.quote'), author: 'Anna Becker', role: t('home.social.t2.role') },
+		{ quote: t('home.social.t3.quote'), author: 'Marek Dvořák', role: t('home.social.t3.role') }
+	]);
 
 	const trustedBy = ['Acme', 'Hyperion', 'Northwind', 'Outpost', 'Vega', 'Lumen'];
 </script>
 
 <svelte:head>
-	<title>Demo Co. — Build a faster web</title>
-	<meta name="description" content="A performance-first stack for teams that ship." />
+	<title>Demo Co. — {t('home.hero.title')}</title>
+	<meta name="description" content={t('home.hero.subtitle')} />
 	<link rel="canonical" href="/{lang}" />
 	<meta property="og:title" content="Demo Co." />
-	<meta property="og:description" content="A performance-first stack for teams that ship." />
+	<meta property="og:description" content={t('home.hero.subtitle')} />
 	<meta property="og:type" content="website" />
 	<link rel="alternate" hreflang="en" href="/en" />
 	<link rel="alternate" hreflang="de" href="/de" />
@@ -114,11 +91,26 @@
 		></div>
 	</div>
 	<div class="relative mx-auto max-w-3xl">
-		<Badge variant="accent" class="mb-4">SvelteKit · TypeScript · Tailwind</Badge>
-		<h1 class="mb-4 text-5xl font-extrabold tracking-tight text-[var(--fg)] md:text-6xl">
+		<!-- eyebrow label — matches brief style -->
+		<div class="mb-4 inline-flex items-center gap-2">
+			<span class="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]"></span>
+			<span
+				class="font-mono text-[11.5px] font-bold uppercase tracking-[0.1em] text-[var(--accent-ink)]"
+			>
+				{t('home.eyebrow')}
+			</span>
+		</div>
+
+		<!-- gradient h1 — bg-clip-text with extra padding to prevent descender clipping -->
+		<h1
+			class="mb-4 bg-gradient-to-b from-[var(--fg)] to-[var(--fg-2)] bg-clip-text text-transparent"
+			style="font-size: clamp(34px, 4.4vw, 46px); font-weight: 800; line-height: 1.15; letter-spacing: -0.025em; padding-bottom: 0.1em;"
+		>
 			{t('home.hero.title')}
 		</h1>
-		<p class="mb-8 text-xl text-[var(--muted)]">{t('home.hero.subtitle')}</p>
+		<p class="mb-8 max-w-[64ch] text-[18px] leading-[1.62] text-[var(--muted)]">
+			{t('home.hero.subtitle')}
+		</p>
 		<div class="flex flex-wrap items-center justify-center gap-3">
 			<a
 				href="/{lang}/blog"
@@ -130,7 +122,7 @@
 				href="/login"
 				class="inline-flex items-center justify-center gap-2 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-soft)] px-6 py-3 text-base font-medium text-[var(--fg)] transition-all duration-150 hover:bg-[var(--border)] active:scale-[0.98]"
 			>
-				Sign in
+				{t('nav.login')}
 			</a>
 		</div>
 	</div>
@@ -138,7 +130,10 @@
 
 <!-- Features -->
 <section aria-labelledby="features-heading" class="mx-auto max-w-6xl px-6 py-20">
-	<h2 id="features-heading" class="mb-12 text-center text-3xl font-bold text-[var(--fg)]">
+	<h2
+		id="features-heading"
+		class="mb-12 text-center text-[26px] font-bold tracking-[-0.018em] text-[var(--fg)]"
+	>
 		{t('home.features.title')}
 	</h2>
 	<ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
@@ -157,8 +152,11 @@
 <!-- Pricing -->
 <section aria-labelledby="pricing-heading" class="bg-[var(--bg-soft)] px-6 py-20">
 	<div class="mx-auto max-w-5xl">
-		<h2 id="pricing-heading" class="mb-12 text-center text-3xl font-bold text-[var(--fg)]">
-			Pricing
+		<h2
+			id="pricing-heading"
+			class="mb-12 text-center text-[26px] font-bold tracking-[-0.018em] text-[var(--fg)]"
+		>
+			{t('home.pricing.title')}
 		</h2>
 		<div class="grid gap-6 md:grid-cols-3">
 			{#each pricing as plan (plan.name)}
@@ -168,7 +166,8 @@
 						: ''}"
 				>
 					{#if plan.highlight}
-						<Badge variant="accent" class="absolute -top-3 left-1/2 -translate-x-1/2">Popular</Badge
+						<Badge variant="accent" class="absolute -top-3 left-1/2 -translate-x-1/2"
+							>{t('home.pricing.popular')}</Badge
 						>
 					{/if}
 					<h3 class="text-lg font-bold text-[var(--fg)]">{plan.name}</h3>
@@ -188,7 +187,7 @@
 							? 'bg-[var(--accent)] text-white hover:opacity-90'
 							: 'border border-[var(--border)] bg-[var(--bg-soft)] text-[var(--fg)] hover:bg-[var(--border)]'}"
 					>
-						Get started
+						{t('home.pricing.cta')}
 					</a>
 				</Card>
 			{/each}
@@ -199,10 +198,10 @@
 <!-- Social proof -->
 <section aria-labelledby="social-proof-heading" class="px-6 py-20">
 	<div class="mx-auto max-w-5xl">
-		<h2 id="social-proof-heading" class="sr-only">Customer testimonials</h2>
+		<h2 id="social-proof-heading" class="sr-only">{t('home.social.heading')}</h2>
 
 		<p class="mb-8 text-center text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
-			Trusted by teams at
+			{t('home.social.trustedBy')}
 		</p>
 		<ul
 			class="mb-16 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70"
