@@ -2,11 +2,12 @@ import type { RequestHandler } from './$types';
 import { ImageResponse } from '@vercel/og';
 import { getPost } from '$lib/server/data/posts.js';
 
-// Edge runtime + @vercel/og (satori + resvg-wasm) renders a real PNG that
-// Facebook, X, and LinkedIn can use for og:image previews. SVG was nice and
-// cheap, but those platforms refuse to render it. Per-slug cache key, content
-// is stable, so we hand back a 1-year immutable cache.
-export const config = { runtime: 'edge' };
+// @vercel/og renders a real PNG via satori + resvg-wasm that Facebook, X,
+// and LinkedIn can use for og:image previews. We run this on Node rather
+// than edge — @vercel/og's default font loader depends on Vercel's
+// `vc-blob-asset` resolver, which only ships with Next.js. Cold-start cost
+// is hidden behind a 1-year immutable cache keyed by slug.
+export const config = { runtime: 'nodejs20.x' };
 
 export const GET: RequestHandler = ({ params }) => {
 	const post = getPost(params.slug);
