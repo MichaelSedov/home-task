@@ -18,13 +18,17 @@ export const load: PageServerLoad = ({ params, url }) => {
 	const translation = post.translations[params.lang] ?? post.translations['en'];
 	if (!translation) error(404, 'Post not found');
 
+	const origin = process.env.PUBLIC_ORIGIN || url.origin;
+	const canonical = `${origin}/${params.lang}/blog/${post.slug}`;
+	const ogImage = `${origin}/og/${post.slug}.png`;
+
 	const jsonLd = buildArticleJsonLd({
 		title: translation.title,
 		description: translation.excerpt,
-		url: url.href,
+		url: canonical,
 		publishedAt: post.publishedAt,
 		author: post.author.name,
-		image: `${url.origin}/og/${post.slug}.png`
+		image: ogImage
 	});
 
 	return {
@@ -35,6 +39,6 @@ export const load: PageServerLoad = ({ params, url }) => {
 			body: translation.body
 		},
 		jsonLd,
-		ogImage: `${url.origin}/og/${post.slug}.png`
+		ogImage
 	};
 };

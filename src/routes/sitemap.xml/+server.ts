@@ -5,7 +5,7 @@ import { SUPPORTED_LOCALES } from '$lib/i18n/dict.js';
 export const prerender = true;
 
 export const GET: RequestHandler = ({ url }) => {
-	const origin = url.origin;
+	const origin = process.env.PUBLIC_ORIGIN || url.origin;
 	const posts = getPosts();
 
 	const staticRoutes = SUPPORTED_LOCALES.flatMap((lang) => [

@@ -8,5 +8,12 @@ export const load: LayoutServerLoad = ({ url, locals }) => {
 	const segment = url.pathname.split('/')[1];
 	const lang = isLocale(segment) ? segment : locals.lang;
 	const dict = loadDict(lang);
-	return { lang, theme: locals.theme, dict, user: locals.user };
+
+	// Origin must be absolute for canonical / hreflang (Lighthouse SEO rejects
+	// relative ones). At prerender time SvelteKit hands us a placeholder origin
+	// (`http://sveltekit-prerender`); on Vercel we substitute PUBLIC_ORIGIN
+	// so the baked-in URLs match production. Falls back to url.origin at runtime.
+	const origin = process.env.PUBLIC_ORIGIN || url.origin;
+
+	return { lang, theme: locals.theme, dict, user: locals.user, origin };
 };

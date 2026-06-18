@@ -30,15 +30,17 @@
 <svelte:head>
 	<title>{post.title} — Demo Co.</title>
 	<meta name="description" content={post.excerpt} />
-	<link rel="canonical" href="/{lang}/blog/{post.slug}" />
+	<link rel="canonical" href="{data.origin}/{lang}/blog/{post.slug}" />
 	<meta property="og:title" content={post.title} />
 	<meta property="og:description" content={post.excerpt} />
 	<meta property="og:type" content="article" />
+	<meta property="og:url" content="{data.origin}/{lang}/blog/{post.slug}" />
 	<meta property="og:image" content={data.ogImage} />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:image" content={data.ogImage} />
-	<link rel="alternate" hreflang="en" href="/en/blog/{post.slug}" />
-	<link rel="alternate" hreflang="de" href="/de/blog/{post.slug}" />
+	<link rel="alternate" hreflang="en" href="{data.origin}/en/blog/{post.slug}" />
+	<link rel="alternate" hreflang="de" href="{data.origin}/de/blog/{post.slug}" />
+	<link rel="alternate" hreflang="x-default" href="{data.origin}/en/blog/{post.slug}" />
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html jsonLdTag}
 </svelte:head>

@@ -8,6 +8,8 @@ on:
 
 env:
   SESSION_SECRET: ${{ secrets.SESSION_SECRET || 'ci-secret-placeholder-minimum-32-chars' }}
+  # LHCI runs against http://localhost:4173, so canonical/hreflang must match.
+  PUBLIC_ORIGIN: http://localhost:4173
 
 jobs:
   ci:

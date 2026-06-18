@@ -13,9 +13,10 @@
 <svelte:head>
 	<title>{t('blog.title')} — Demo Co.</title>
 	<meta name="description" content="Writing and thinking from the Demo Co. team." />
-	<link rel="canonical" href="/{lang}/blog" />
-	<link rel="alternate" hreflang="en" href="/en/blog" />
-	<link rel="alternate" hreflang="de" href="/de/blog" />
+	<link rel="canonical" href="{data.origin}/{lang}/blog" />
+	<link rel="alternate" hreflang="en" href="{data.origin}/en/blog" />
+	<link rel="alternate" hreflang="de" href="{data.origin}/de/blog" />
+	<link rel="alternate" hreflang="x-default" href="{data.origin}/en/blog" />
 </svelte:head>
 
 <div class="mx-auto max-w-5xl px-6 py-14">

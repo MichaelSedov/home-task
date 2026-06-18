@@ -67,13 +67,14 @@
 <svelte:head>
 	<title>Demo Co. — {t('home.hero.title')}</title>
 	<meta name="description" content={t('home.hero.subtitle')} />
-	<link rel="canonical" href="/{lang}" />
+	<link rel="canonical" href="{data.origin}/{lang}" />
 	<meta property="og:title" content="Demo Co." />
 	<meta property="og:description" content={t('home.hero.subtitle')} />
 	<meta property="og:type" content="website" />
-	<link rel="alternate" hreflang="en" href="/en" />
-	<link rel="alternate" hreflang="de" href="/de" />
-	<link rel="alternate" hreflang="x-default" href="/en" />
+	<meta property="og:url" content="{data.origin}/{lang}" />
+	<link rel="alternate" hreflang="en" href="{data.origin}/en" />
+	<link rel="alternate" hreflang="de" href="{data.origin}/de" />
+	<link rel="alternate" hreflang="x-default" href="{data.origin}/en" />
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html jsonLdTag}
 </svelte:head>

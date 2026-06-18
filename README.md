@@ -26,8 +26,14 @@ npm run lhci                  # Lighthouse CI (run after preview)
 npm run size                  # size-limit check
 ```
 
-Node ≥ 22 required (see `.nvmrc`). The only required environment variable for local
-dev is `SESSION_SECRET` — any 32+ character string works.
+Node ≥ 22 required (see `.nvmrc`).
+
+**Environment variables:**
+
+| Variable         | Required   | Purpose                                                                                                                                                                                                                       |
+| ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SESSION_SECRET` | yes        | HMAC key for signed session cookies. Any 32+ character random string.                                                                                                                                                         |
+| `PUBLIC_ORIGIN`  | production | Absolute origin used for prerendered canonical / hreflang / sitemap URLs. Set this in Vercel project settings to `https://<your-domain>` so SEO links bake in correctly at build time. Falls back to `url.origin` at runtime. |
 
 ## Demo accounts
 
