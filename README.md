@@ -188,6 +188,11 @@ Husky + lint-staged run Prettier + ESLint on staged files before commit (< 2 s).
 
 Things I deliberately left out of scope, and why.
 
+- **Visual snapshots run locally, not in CI.** Playwright stores per-OS baselines
+  (`*-chromium-darwin.png`); the committed baselines were captured on macOS, and
+  Linux CI would always diff on font rendering. The proper fix is generating
+  per-OS baselines via Docker. Visual tests still guard against design
+  regressions during local development.
 - **No image pipeline (`srcset`, AVIF/WebP, LQIP).** The current design ships zero
   raster images on the marketing surface — post covers are CSS gradients, avatars
   are coloured initials. An image pipeline would be architecture without a problem
