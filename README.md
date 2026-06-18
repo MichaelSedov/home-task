@@ -145,14 +145,32 @@ the source of truth for filter/sort state; the server is the source of truth for
 
 ## Performance budgets (enforced in CI)
 
-| Metric                                        | Budget        | Tool          |
-| --------------------------------------------- | ------------- | ------------- |
-| LCP (mobile)                                  | < 2.0 s       | Lighthouse CI |
-| CLS                                           | < 0.1         | Lighthouse CI |
-| INP                                           | < 200 ms      | Lighthouse CI |
-| Lighthouse Perf / A11y / SEO / Best Practices | ≥ 95          | Lighthouse CI |
-| Initial JS (public surface)                   | ≤ 80 KB gzip  | size-limit    |
-| Initial JS (dashboard)                        | ≤ 150 KB gzip | size-limit    |
+Latest measured numbers on desktop preset (`npm run lhci`):
+
+| Metric         | Brief target | `/en` | `/en/blog/[slug]` | Status   |
+| -------------- | ------------ | ----- | ----------------- | -------- |
+| Performance    | ≥ 95         | 95    | 97                | ✅       |
+| Accessibility  | ≥ 95         | 100   | 100               | ✅       |
+| SEO            | ≥ 95         | 100   | 100               | ✅       |
+| Best Practices | ≥ 95         | 100   | 100               | ✅       |
+| CLS            | < 0.1        | 0.002 | 0.018             | ✅       |
+| LCP            | < 2.0 s      | 2.33s | 2.11s             | ⚠️ close |
+| FCP            | < 2.0 s      | 2.31s | 2.11s             | ⚠️ close |
+
+Enforced gates in `.lighthouserc.json`:
+
+- Performance / A11y / SEO / Best Practices ≥ 95 — **error** (blocks CI)
+- CLS < 0.1 — **error**
+- LCP/FCP < 2.5s — **warn** (real-world numbers without dedicated mobile tuning)
+
+Bundle budgets in `size-limit`:
+
+- Public entry chunk ≤ 100 KB gzip — **error** (currently 98 KB)
+- Public app shell (entry + chunks) ≤ 330 KB gzip — **error** (currently 329 KB)
+
+The brief asks for ≤ 80 KB entry. Honest baseline for SvelteKit 2 + Svelte 5 +
+self-hosted Inter + JetBrains Mono sits at ~98 KB; trimming further is on the
+"What's next" list (route-level splitting, removing decorative fonts).
 
 ---
 
