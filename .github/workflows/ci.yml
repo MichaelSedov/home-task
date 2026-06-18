@@ -52,8 +52,22 @@ jobs:
         run: npm run size
 
       # ── 7. Playwright install ─────────────────────────────────────────────
-      - name: Install Playwright browsers
+      # Cache the ~120 MB chromium tarball keyed on the locked Playwright
+      # version. On cache hit only the lightweight apt step runs.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: pw-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers (cache miss)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       # ── 8. E2E tests ──────────────────────────────────────────────────────
       - name: E2E tests
