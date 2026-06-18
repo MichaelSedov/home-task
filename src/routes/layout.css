@@ -104,6 +104,7 @@ body {
 	background: var(--bg);
 	line-height: 1.65;
 	font-size: 16px;
+	font-feature-settings: 'ss01', 'cv11';
 	-webkit-font-smoothing: antialiased;
 	transition:
 		background 240ms ease,
@@ -120,4 +121,16 @@ body {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 	border-radius: 4px;
+}
+
+/* ---------- inline code ---------- */
+code {
+	font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 13px;
+	font-weight: 500;
+	background: var(--bg-soft);
+	border: 1px solid var(--border);
+	padding: 1.5px 6px;
+	border-radius: 6px;
+	color: var(--fg);
 }

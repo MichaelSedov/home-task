@@ -3,8 +3,6 @@
 	import { formatDate } from '$lib/i18n/t.js';
 	import { getTags } from '$lib/i18n/dict.js';
 	import Avatar from '$lib/ui/primitives/Avatar.svelte';
-	import Badge from '$lib/ui/primitives/Badge.svelte';
-	import Card from '$lib/ui/primitives/Card.svelte';
 
 	let { data } = $props();
 	const t = getT();
@@ -20,55 +18,73 @@
 	<link rel="alternate" hreflang="de" href="/de/blog" />
 </svelte:head>
 
-<div class="mx-auto max-w-4xl px-6 py-16">
-	<header class="mb-12">
-		<h1 class="text-4xl font-extrabold text-[var(--fg)]">{t('blog.title')}</h1>
-	</header>
+<div class="mx-auto max-w-5xl px-6 py-14">
+	<h1 class="mb-10 text-[26px] font-bold tracking-[-0.018em] text-[var(--fg)]">
+		{t('blog.title')}
+	</h1>
 
 	{#if data.posts.length === 0}
 		<p class="text-[var(--muted)]">{t('blog.empty')}</p>
 	{:else}
-		<ol class="space-y-8" aria-label="Blog posts">
+		<!-- Grid layout matching the brief's post-grid -->
+		<ol
+			class="grid gap-3.5"
+			style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))"
+			aria-label="Blog posts"
+		>
 			{#each data.posts as post (post.id)}
 				<li>
-					<Card as="article" hover class="overflow-hidden">
-						<a href="/{lang}/blog/{post.slug}" class="block p-6 focus-visible:outline-none">
-							<div
-								class="mb-4 h-2 w-full rounded-full"
-								style="background-color: {post.coverColor}"
-								aria-hidden="true"
-							></div>
+					<a
+						href="/{lang}/blog/{post.slug}"
+						class="group flex flex-col overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elev)] transition-all duration-200 hover:-translate-y-[3px] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-md)]"
+					>
+						<!-- Cover — gradient using post's coverColor -->
+						<div
+							class="h-[70px] flex-shrink-0"
+							style="background: linear-gradient(135deg, {post.coverColor}, color-mix(in oklab, {post.coverColor} 60%, black))"
+							aria-hidden="true"
+						></div>
 
-							<div class="flex flex-wrap gap-2 mb-3">
-								{#each post.tags as tag (tag)}
-									{@const tagDef = allTags.find((t2) => t2.slug === tag)}
-									<Badge variant="muted">{tagDef?.label[lang] ?? tag}</Badge>
-								{/each}
-							</div>
+						<div class="flex flex-1 flex-col p-3.5">
+							<!-- Tags -->
+							{#if post.tags.length > 0}
+								<div class="mb-2 flex flex-wrap gap-1">
+									{#each post.tags.slice(0, 3) as tag (tag)}
+										{@const tagDef = allTags.find((t2) => t2.slug === tag)}
+										<span
+											class="rounded-full border border-[var(--border)] bg-[var(--bg-soft)] px-[7px] py-[1.5px] text-[10.5px] font-semibold text-[var(--muted)]"
+										>
+											{tagDef?.label[lang] ?? tag}
+										</span>
+									{/each}
+								</div>
+							{/if}
 
-							<h2 class="mb-2 text-xl font-bold text-[var(--fg)] group-hover:text-[var(--accent)]">
+							<!-- Title -->
+							<h2
+								class="mb-1.5 text-[14px] font-semibold leading-[1.35] tracking-[-0.005em] text-[var(--fg)]"
+							>
 								{post.title}
 							</h2>
-							<p class="mb-4 line-clamp-2 text-sm text-[var(--muted)]">{post.excerpt}</p>
 
-							<div class="flex items-center justify-between text-xs text-[var(--muted)]">
-								<div class="flex items-center gap-2">
-									<Avatar name={post.author.name} color={post.author.avatarColor} size="sm" />
-									<span>{post.author.name}</span>
-								</div>
-								<div class="flex items-center gap-3">
-									<time datetime={post.publishedAt}>{formatDate(post.publishedAt, lang)}</time>
-									<span>{t('blog.readingTime', { minutes: String(post.readingTimeMinutes) })}</span>
-								</div>
-							</div>
+							<!-- Excerpt -->
+							<p class="mb-2.5 line-clamp-3 text-[12.5px] leading-[1.5] text-[var(--muted)]">
+								{post.excerpt}
+							</p>
 
-							<span
-								class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--accent)]"
+							<!-- Meta -->
+							<div
+								class="mt-auto flex flex-wrap items-center gap-2 text-[11px] text-[var(--muted)]"
 							>
-								{t('blog.readMore')} →
-							</span>
-						</a>
-					</Card>
+								<Avatar name={post.author.name} color={post.author.avatarColor} size="sm" />
+								<span>{post.author.name}</span>
+								<span>·</span>
+								<time datetime={post.publishedAt}>{formatDate(post.publishedAt, lang)}</time>
+								<span>·</span>
+								<span>{t('blog.readingTime', { minutes: String(post.readingTimeMinutes) })}</span>
+							</div>
+						</div>
+					</a>
 				</li>
 			{/each}
 		</ol>
