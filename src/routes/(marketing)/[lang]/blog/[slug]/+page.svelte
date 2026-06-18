@@ -1,30 +1,13 @@
 <script lang="ts">
-	import { getT, getLang } from '$lib/i18n/context.js';
-	import { formatDate } from '$lib/i18n/t.js';
-	import { getTags } from '$lib/i18n/dict.js';
-	import Avatar from '$lib/ui/primitives/Avatar.svelte';
-	import Badge from '$lib/ui/primitives/Badge.svelte';
+	import { getLang } from '$lib/i18n/context.js';
+	import Byline from '$lib/ui/composite/Byline.svelte';
+	import PostTagList from '$lib/ui/composite/PostTagList.svelte';
+	import { renderMarkdown } from '$lib/util/markdown.js';
 
 	let { data } = $props();
-	const t = getT();
 	const lang = getLang();
 	const post = $derived(data.post);
 	const jsonLdTag = $derived(`<script type="application/ld+json">${data.jsonLd}<` + `/script>`);
-	const allTags = getTags();
-
-	// Minimal markdown → HTML: bold, italic, paragraphs, line breaks
-	function renderBody(text: string): string {
-		return text
-			.split('\n\n')
-			.map(
-				(p) =>
-					`<p>${p
-						.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-						.replace(/\*(.+?)\*/g, '<em>$1</em>')
-						.replace(/\n/g, '<br />')}</p>`
-			)
-			.join('');
-	}
 </script>
 
 <svelte:head>
@@ -46,52 +29,52 @@
 </svelte:head>
 
 <article class="mx-auto max-w-2xl px-6 py-16" aria-labelledby="post-title">
-	<!-- Cover color bar -->
 	<div
 		class="mb-8 h-3 w-full rounded-full"
 		style="background-color: {post.coverColor}"
 		aria-hidden="true"
 	></div>
 
-	<!-- Tags -->
-	<nav aria-label="Post tags" class="mb-4 flex flex-wrap gap-2">
-		{#each post.tags as tag (tag)}
-			{@const tagDef = allTags.find((t2) => t2.slug === tag)}
-			<a href="/{lang}/search?tag={tag}">
-				<Badge variant="muted">{tagDef?.label[lang] ?? tag}</Badge>
-			</a>
-		{/each}
-	</nav>
+	<PostTagList tags={post.tags} variant="badge" />
 
-	<h1 id="post-title" class="mb-4 text-4xl font-extrabold leading-tight text-[var(--fg)]">
+	<h1 id="post-title" class="mb-4 text-4xl font-extrabold leading-tight text-fg">
 		{post.title}
 	</h1>
 
-	<!-- Byline -->
-	<div class="mb-8 flex items-center gap-3 text-sm text-[var(--muted)]">
-		<Avatar name={post.author.name} color={post.author.avatarColor} size="md" />
-		<div>
-			<p class="font-medium text-[var(--fg-2)]">{post.author.name}</p>
-			<p>
-				<time datetime={post.publishedAt}>{formatDate(post.publishedAt, lang)}</time>
-				·
-				{t('blog.readingTime', { minutes: String(post.readingTimeMinutes) })}
-			</p>
-		</div>
+	<div class="mb-8">
+		<Byline
+			author={post.author}
+			publishedAt={post.publishedAt}
+			readingTimeMinutes={post.readingTimeMinutes}
+			variant="stacked"
+		/>
 	</div>
 
-	<!-- Body -->
-	<div
-		class="prose max-w-none text-[var(--fg-2)] [&_p]:mb-4 [&_p]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-[var(--fg)] [&_em]:italic"
-	>
+	<div class="post-body prose max-w-none">
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-		{@html renderBody(post.body)}
+		{@html renderMarkdown(post.body)}
 	</div>
 
-	<!-- Back link -->
-	<nav aria-label="Post navigation" class="mt-12 border-t border-[var(--border)] pt-6">
-		<a href="/{lang}/blog" class="text-sm font-medium text-[var(--accent)] hover:underline">
+	<nav aria-label="Post navigation" class="mt-12 border-t border-border pt-6">
+		<a href="/{lang}/blog" class="text-sm font-medium text-accent hover:underline">
 			← Back to blog
 		</a>
 	</nav>
 </article>
+
+<style>
+	.post-body {
+		color: var(--fg-2);
+	}
+	.post-body :global(p) {
+		margin-bottom: 1rem;
+		line-height: 1.625;
+	}
+	.post-body :global(strong) {
+		font-weight: 600;
+		color: var(--fg);
+	}
+	.post-body :global(em) {
+		font-style: italic;
+	}
+</style>
