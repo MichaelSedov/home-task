@@ -45,7 +45,9 @@ let failed = false;
 for (const route of ROUTES) {
 	const htmlPath = join(PRERENDER_ROOT, route.html);
 	if (!existsSync(htmlPath)) {
-		console.error(`✗ ${route.name}: prerendered HTML not found at ${htmlPath} — run \`npm run build\` first`);
+		console.error(
+			`✗ ${route.name}: prerendered HTML not found at ${htmlPath} — run \`npm run build\` first`
+		);
 		failed = true;
 		continue;
 	}
